@@ -147,7 +147,7 @@ public class EditXClusterConfig extends CreateXClusterConfig {
                 false /* keepEntry */,
                 databaseNamesToBeDropped);
           }
-        } else if (editFormData.databases != null) {
+        } else if (editFormData.databases != null) { // Used for DB scoped replication only
           addSubtasksToAddDatabasesToXClusterConfig(xClusterConfig, editFormData.databases);
         } else {
           throw new RuntimeException("No edit operation was specified in editFormData");
@@ -362,8 +362,8 @@ public class EditXClusterConfig extends CreateXClusterConfig {
 
   protected void addSubtasksToAddDatabasesToXClusterConfig(
       XClusterConfig xClusterConfig, Set<String> databases) {
-    createXClusterAddNamespaceToOutboundReplicationGroupTask(xClusterConfig, databases);
-    createAddNamespaceToXClusterReplicationTask(xClusterConfig, databases);
+    createXClusterAddNamespaceToOutboundReplicationGroupTasks(xClusterConfig, databases);
+    createAddNamespaceToXClusterReplicationTasks(xClusterConfig, databases);
     if (xClusterConfig.isUsedForDr()) {
       createSetDrStatesTask(
               xClusterConfig,

@@ -33,6 +33,7 @@ public class XClusterConfigTaskParams extends UniverseDefinitionTaskParams {
   protected DrConfigCreateForm.PitrParams pitrParams;
   protected boolean isForceBootstrap = false;
   public Set<String> dbs;
+  public String dbToAdd;
 
   public XClusterConfigTaskParams(
       XClusterConfig xClusterConfig,

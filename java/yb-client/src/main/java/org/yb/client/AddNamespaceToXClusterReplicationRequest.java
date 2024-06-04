@@ -16,8 +16,6 @@ public class AddNamespaceToXClusterReplicationRequest
     extends YRpc<AddNamespaceToXClusterReplicationResponse> {
   private final String replicationGroupId;
 
-  // If target addresses are set, will delete replication on both source and target.
-  // If target addresses is null, will only delete outbound replication from the source.
   private final Set<HostPortPB> targetMasterAddresses;
 
   private final String namespaceId;
@@ -39,9 +37,7 @@ public class AddNamespaceToXClusterReplicationRequest
     final MasterReplicationOuterClass.AddNamespaceToXClusterReplicationRequestPB.Builder builder =
         MasterReplicationOuterClass.AddNamespaceToXClusterReplicationRequestPB.newBuilder();
     builder.setReplicationGroupId(this.replicationGroupId);
-    if (targetMasterAddresses != null) {
-      builder.addAllTargetMasterAddresses(this.targetMasterAddresses);
-    }
+    builder.addAllTargetMasterAddresses(this.targetMasterAddresses);
     builder.setNamespaceId(this.namespaceId);
     return toChannelBuffer(header, builder.build());
   }

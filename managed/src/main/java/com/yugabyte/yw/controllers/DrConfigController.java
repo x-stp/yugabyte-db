@@ -49,6 +49,7 @@ import com.yugabyte.yw.models.XClusterConfig.ConfigType;
 import com.yugabyte.yw.models.XClusterConfig.XClusterConfigStatusType;
 import com.yugabyte.yw.models.XClusterTableConfig;
 import com.yugabyte.yw.models.XClusterTableConfig.Status;
+import com.yugabyte.yw.models.common.YbaApi;
 import com.yugabyte.yw.models.helpers.TaskType;
 import com.yugabyte.yw.rbac.annotations.AuthzPath;
 import com.yugabyte.yw.rbac.annotations.PermissionAttribute;
@@ -1090,6 +1091,7 @@ public class DrConfigController extends AuthenticatedController {
    * @return An instance of YBPTask including the dr config uuid
    */
   @ApiOperation(
+      notes = "WARNING: This is a preview API that could change.",
       nickname = "setDatabasesDrConfig",
       value = "Set databases in disaster recovery config",
       response = YBPTask.class)
@@ -1106,6 +1108,7 @@ public class DrConfigController extends AuthenticatedController {
             @PermissionAttribute(resourceType = ResourceType.OTHER, action = Action.UPDATE),
         resourceLocation = @Resource(path = Util.CUSTOMERS, sourceType = SourceType.ENDPOINT))
   })
+  @YbaApi(visibility = YbaApi.YbaApiVisibility.PREVIEW, sinceYBAVersion = "2.23.0.0")
   public Result setDatabases(UUID customerUUID, UUID drConfigUuid, Http.Request request) {
     log.info("Received set databases drConfig request");
 
@@ -1115,11 +1118,10 @@ public class DrConfigController extends AuthenticatedController {
     disallowActionOnErrorState(drConfig);
     XClusterConfig xClusterConfig = drConfig.getActiveXClusterConfig();
     DrConfigSetDatabasesForm setDatabasesForm = parseSetDatabasesForm(customerUUID, request);
-
-    Set<String> databaseIdsToAdd = setDatabasesForm.databases;
-    // XClusterConfigTaskBase.getDatabaseIdsDiff(xClusterConfig.getNamepaces(),
-    // setDatabasesForm.databases)
-    //     .getFirst();
+    Set<String> existingDatabaseIds = xClusterConfig.getDbIds();
+    Set<String> newDatabaseIds = setDatabasesForm.databases;
+    Set<String> databaseIdsToAdd = new HashSet<>(newDatabaseIds);
+    databaseIdsToAdd.removeAll(existingDatabaseIds);
 
     XClusterConfigController.verifyTaskAllowed(xClusterConfig, TaskType.EditXClusterConfig);
     Universe sourceUniverse =
@@ -1133,7 +1135,7 @@ public class DrConfigController extends AuthenticatedController {
 
     XClusterConfigTaskParams taskParams =
         XClusterConfigController.getSetDatabasesTaskParams(
-            ybService, xClusterConfig, setDatabasesForm.databases);
+            ybService, xClusterConfig, databaseIdsToAdd);
 
     UUID taskUUID = commissioner.submit(TaskType.SetDatabasesDrConfig, taskParams);
     CustomerTask.create(

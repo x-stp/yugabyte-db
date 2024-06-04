@@ -1898,20 +1898,20 @@ public abstract class XClusterConfigTaskBase extends UniverseDefinitionTaskBase 
    * @param dbIds db ids on the source universe that are being added to checkpoint.
    * @return The created subtask group
    */
-  protected SubTaskGroup createXClusterAddNamespaceToOutboundReplicationGroupTask(
+  protected SubTaskGroup createXClusterAddNamespaceToOutboundReplicationGroupTasks(
       XClusterConfig xClusterConfig, Set<String> dbIds) {
     SubTaskGroup subTaskGroup =
         createSubTaskGroup("XClusterAddNamespaceToOutboundReplicationGroup");
     XClusterConfigTaskParams xClusterConfigParams = new XClusterConfigTaskParams();
     xClusterConfigParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
     xClusterConfigParams.xClusterConfig = xClusterConfig;
-    log.info("***** The databse is {}******", dbIds);
-    xClusterConfigParams.dbs = dbIds;
-
-    XClusterAddNamespaceToOutboundReplicationGroup task =
-        createTask(XClusterAddNamespaceToOutboundReplicationGroup.class);
-    task.initialize(xClusterConfigParams);
-    subTaskGroup.addSubTask(task);
+    for (String dbId : dbIds) {
+      xClusterConfigParams.dbToAdd = dbId;
+      XClusterAddNamespaceToOutboundReplicationGroup task =
+          createTask(XClusterAddNamespaceToOutboundReplicationGroup.class);
+      task.initialize(xClusterConfigParams);
+      subTaskGroup.addSubTask(task);
+    }
     getRunnableTask().addSubTaskGroup(subTaskGroup);
     return subTaskGroup;
   }
@@ -1923,17 +1923,18 @@ public abstract class XClusterConfigTaskBase extends UniverseDefinitionTaskBase 
    * @param dbIds db ids on the source universe that are being added to the replication.
    * @return The created subtask group
    */
-  protected SubTaskGroup createAddNamespaceToXClusterReplicationTask(
+  protected SubTaskGroup createAddNamespaceToXClusterReplicationTasks(
       XClusterConfig xClusterConfig, Set<String> dbIds) {
     SubTaskGroup subTaskGroup = createSubTaskGroup("AddNamespaceToXClusterReplication");
     XClusterConfigTaskParams xClusterConfigParams = new XClusterConfigTaskParams();
     xClusterConfigParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
     xClusterConfigParams.xClusterConfig = xClusterConfig;
-    xClusterConfigParams.dbs = dbIds;
-
-    AddNamespaceToXClusterReplication task = createTask(AddNamespaceToXClusterReplication.class);
-    task.initialize(xClusterConfigParams);
-    subTaskGroup.addSubTask(task);
+    for (String dbId : dbIds) {
+      xClusterConfigParams.dbToAdd = dbId;
+      AddNamespaceToXClusterReplication task = createTask(AddNamespaceToXClusterReplication.class);
+      task.initialize(xClusterConfigParams);
+      subTaskGroup.addSubTask(task);
+    }
     getRunnableTask().addSubTaskGroup(subTaskGroup);
     return subTaskGroup;
   }

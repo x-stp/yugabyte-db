@@ -1661,7 +1661,7 @@ public class AsyncYBClient implements AutoCloseable {
   }
 
   /**
-   * Checkpoints the namespace to be added to the outbound replication group
+   * Checkpoints the namespace to be added to the outbound replication group.
    *
    * @param replicationGroupId name of the replication group
    * @param namespaceId namespace id to add to the replication group
@@ -1680,16 +1680,16 @@ public class AsyncYBClient implements AutoCloseable {
   }
 
   /**
-   * Adds the namespace to the xcluster replication
+   * Adds the namespace to the xcluster replication.
    *
-   * @param replicationGroupId name of the replication group to add ma,es[aces]
+   * @param replicationGroupId name of the replication group
    * @param targetMasterAddresses target universe master addresses corresponding to replication.
    * @param namespaceId namespace id to add to the replication group
    * @return A deferred object that yields a {@link AddNamespaceToXClusterReplicationResponse}
    */
   public Deferred<AddNamespaceToXClusterReplicationResponse> addNamespaceToXClusterReplication(
       String replicationGroupId,
-      @Nullable Set<CommonNet.HostPortPB> targetMasterAddresses,
+      Set<CommonNet.HostPortPB> targetMasterAddresses,
       String namespaceId) {
     checkIsClosed();
     AddNamespaceToXClusterReplicationRequest request =
@@ -1708,7 +1708,7 @@ public class AsyncYBClient implements AutoCloseable {
    * @return A deferred object that yields a {@link IsAlterXClusterReplicationDoneResponse}
    */
   public Deferred<IsAlterXClusterReplicationDoneResponse> isAlterXClusterReplicationDone(
-      String replicationGroupId, @Nullable Set<CommonNet.HostPortPB> targetMasterAddresses) {
+      String replicationGroupId, Set<CommonNet.HostPortPB> targetMasterAddresses) {
     checkIsClosed();
     IsAlterXClusterReplicationDoneRequest request =
         new IsAlterXClusterReplicationDoneRequest(

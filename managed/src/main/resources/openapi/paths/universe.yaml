@@ -350,10 +350,10 @@
     tags:
       - Universe
     requestBody:
-      $ref: "../components/requestBodies/UniverseSoftwareUpgradeReq.yaml"
+      $ref: ../components/requestBodies/UniverseSoftwareUpgradeReq.yaml
     responses:
       '202':
-        $ref: "../components/responses/YBATaskResp.yaml"
+        $ref: ../components/responses/YBATaskResp.yaml
       '400':
         description: Invalid input
       '500':

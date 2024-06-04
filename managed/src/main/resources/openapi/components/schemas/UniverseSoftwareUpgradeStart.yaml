@@ -2,7 +2,7 @@ title: UniverseSoftwareUpgradeStart
 description: Payload to start a YugabyteDB software upgrade on a Universe
 type: object
 allOf:
-  - $ref: "./SleepAfterRestartSchema.yaml"
+  - $ref: ./SleepAfterRestartSchema.yaml
   - type: object
     required:
       - yugabyte_release

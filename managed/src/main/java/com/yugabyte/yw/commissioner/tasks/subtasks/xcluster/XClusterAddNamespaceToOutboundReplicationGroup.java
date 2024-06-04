@@ -17,7 +17,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.yb.client.IsXClusterBootstrapRequiredResponse;
 import org.yb.client.XClusterAddNamespaceToOutboundReplicationGroupResponse;
 import org.yb.client.YBClient;
@@ -42,11 +42,11 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
     XClusterConfig xClusterConfig = getXClusterConfigFromTaskParams();
     Universe sourceUniverse = Universe.getOrBadRequest(xClusterConfig.getSourceUniverseUUID());
 
-    if (CollectionUtils.isEmpty(taskParams().getDbs())) {
+    if (StringUtils.isBlank(taskParams().getDbToAdd())) {
       throw new RuntimeException(
           String.format(
-              "`dbs` in the task parameters must not be null or empty: it was %s",
-              taskParams().getDbs()));
+              "`dbIdToAdd` in the task parameters must not be null or empty: it was %s",
+              taskParams().getDbToAdd()));
     }
 
     try (YBClient client =
@@ -55,27 +55,26 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
       log.info(
           "Checkpointing databases for XClusterConfig({}): source db ids: {}",
           xClusterConfig.getUuid(),
-          taskParams().getDbs());
+          taskParams().getDbToAdd());
 
-      for (String dbId : taskParams().getDbs()) {
-        XClusterAddNamespaceToOutboundReplicationGroupResponse createResponse =
-            client.xClusterAddNamespaceToOutboundReplicationGroup(
-                xClusterConfig.getReplicationGroupName(), dbId);
+      String dbId = taskParams().getDbToAdd();
+      XClusterAddNamespaceToOutboundReplicationGroupResponse createResponse =
+          client.xClusterAddNamespaceToOutboundReplicationGroup(
+              xClusterConfig.getReplicationGroupName(), dbId);
 
-        if (createResponse.hasError()) {
-          throw new RuntimeException(
-              String.format(
-                  "AddNamespaceToOutboundReplicationGroup rpc failed with error: %s",
-                  createResponse.errorMessage()));
-        }
+      if (createResponse.hasError()) {
+        throw new RuntimeException(
+            String.format(
+                "AddNamespaceToOutboundReplicationGroup rpc failed with error: %s",
+                createResponse.errorMessage()));
       }
 
       validateCheckpointingCompleted(client, sourceUniverse, xClusterConfig);
 
       log.debug(
-          "Checkpointing for xClusterConfig {} completed for source db ids:",
+          "Checkpointing for xClusterConfig {} completed for source db id:",
           xClusterConfig.getUuid(),
-          taskParams().getDbs());
+          taskParams().getDbToAdd());
     } catch (Exception e) {
       log.error("{} hit error : {}", getName(), e.getMessage());
       Throwables.propagate(e);
@@ -86,57 +85,56 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
       YBClient client, Universe sourceUniverse, XClusterConfig xClusterConfig) throws Exception {
     Duration xclusterWaitTimeout =
         this.confGetter.getConfForScope(sourceUniverse, UniverseConfKeys.xclusterSetupAlterTimeout);
-    for (String dbId : taskParams().getDbs()) {
-      log.info(
-          "Validating database {} for XClusterConfig({}) is done checkpointing",
-          dbId,
-          xClusterConfig.getUuid());
-      boolean checkpointingCompleted =
-          doWithConstTimeout(
-              DELAY_BETWEEN_RETRIES_MS,
-              xclusterWaitTimeout.toMillis(),
-              () -> {
-                IsXClusterBootstrapRequiredResponse completionResponse;
+    String dbId = taskParams().getDbToAdd();
+    log.info(
+        "Validating database {} for XClusterConfig({}) is done checkpointing",
+        dbId,
+        xClusterConfig.getUuid());
+    boolean checkpointingCompleted =
+        doWithConstTimeout(
+            DELAY_BETWEEN_RETRIES_MS,
+            xclusterWaitTimeout.toMillis(),
+            () -> {
+              IsXClusterBootstrapRequiredResponse completionResponse;
 
-                try {
-                  completionResponse =
-                      client.isXClusterBootstrapRequired(
-                          xClusterConfig.getReplicationGroupName(), dbId);
-                } catch (Exception e) {
-                  log.error(
-                      "IsXClusterBootstrapRequired rpc for xClusterConfig: {}, db: {}, hit error:"
-                          + " {}",
-                      xClusterConfig.getName(),
-                      dbId,
-                      e.getMessage());
-                  return false;
-                }
-
-                if (completionResponse.hasError()) {
-                  log.error(
-                      "IsXClusterBootstrapRequired rpc for xClusterConfig: {}, db: {}, hit error:"
-                          + " {}",
-                      xClusterConfig.getName(),
-                      dbId,
-                      completionResponse.errorMessage());
-                  return false;
-                }
-                log.debug(
-                    "Checkpointing status is complete: {}, for universe: {}, xClusterConfig: {},"
-                        + " dbId: {}",
-                    !completionResponse.isNotReady(),
-                    sourceUniverse.getUniverseUUID(),
+              try {
+                completionResponse =
+                    client.isXClusterBootstrapRequired(
+                        xClusterConfig.getReplicationGroupName(), dbId);
+              } catch (Exception e) {
+                log.error(
+                    "IsXClusterBootstrapRequired rpc for xClusterConfig: {}, db: {}, hit error:"
+                        + " {}",
                     xClusterConfig.getName(),
-                    dbId);
-                return !completionResponse.isNotReady();
-              });
-      if (!checkpointingCompleted) {
-        throw new PlatformServiceException(
-            BAD_REQUEST,
-            String.format(
-                "Checkpointing database %s for xClusterConfig %s with source universe %s timed out",
-                dbId, xClusterConfig.getName(), sourceUniverse.getUniverseUUID()));
-      }
+                    dbId,
+                    e.getMessage());
+                return false;
+              }
+
+              if (completionResponse.hasError()) {
+                log.error(
+                    "IsXClusterBootstrapRequired rpc for xClusterConfig: {}, db: {}, hit error:"
+                        + " {}",
+                    xClusterConfig.getName(),
+                    dbId,
+                    completionResponse.errorMessage());
+                return false;
+              }
+              log.debug(
+                  "Checkpointing status is complete: {}, for universe: {}, xClusterConfig: {},"
+                      + " dbId: {}",
+                  !completionResponse.isNotReady(),
+                  sourceUniverse.getUniverseUUID(),
+                  xClusterConfig.getName(),
+                  dbId);
+              return !completionResponse.isNotReady();
+            });
+    if (!checkpointingCompleted) {
+      throw new PlatformServiceException(
+          BAD_REQUEST,
+          String.format(
+              "Checkpointing database %s for xClusterConfig %s with source universe %s timed out",
+              dbId, xClusterConfig.getName(), sourceUniverse.getUniverseUUID()));
     }
   }
 }

@@ -17,8 +17,6 @@ public class IsAlterXClusterReplicationDoneRequest extends
     YRpc<IsAlterXClusterReplicationDoneResponse> {
   private final String replicationGroupId;
 
-  // If target addresses are set, will delete replication on both source and target.
-  // If target addresses is null, will only delete outbound replication from the source.
   private final Set<HostPortPB> targetMasterAddresses;
 
   public IsAlterXClusterReplicationDoneRequest(
@@ -35,9 +33,8 @@ public class IsAlterXClusterReplicationDoneRequest extends
       builder =
         MasterReplicationOuterClass.IsAlterXClusterReplicationDoneRequestPB.newBuilder();
     builder.setReplicationGroupId(this.replicationGroupId);
-    if (targetMasterAddresses != null) {
-      builder.addAllTargetMasterAddresses(this.targetMasterAddresses);
-    }
+    builder.addAllTargetMasterAddresses(this.targetMasterAddresses);
+
     return toChannelBuffer(header, builder.build());
   }
 

@@ -2238,7 +2238,7 @@ public class YBClient implements AutoCloseable {
   // --------------------------------------------------------------------------------
 
   /**
-   * @see AsyncYBClient#xClusterAddNamespaceToOutboundReplicationGroup(String, Set<String>)
+   * @see AsyncYBClient#xClusterCreateOutboundReplicationGroup(String, Set<String>)
    */
   public XClusterCreateOutboundReplicationGroupResponse xClusterCreateOutboundReplicationGroup(
       String replicationGroupId, Set<String> namespaceIds) throws Exception {
@@ -2313,7 +2313,7 @@ public class YBClient implements AutoCloseable {
    */
   public AddNamespaceToXClusterReplicationResponse addNamespaceToXClusterReplication(
       String replicationGroupId,
-      @Nullable Set<CommonNet.HostPortPB> targetMasterAddresses,
+      Set<CommonNet.HostPortPB> targetMasterAddresses,
       String namespaceId)
       throws Exception {
     Deferred<AddNamespaceToXClusterReplicationResponse> d =
@@ -2326,7 +2326,7 @@ public class YBClient implements AutoCloseable {
    * @see AsyncYBClient#isAlterXClusterReplicationDone(String, Set<CommonNet.HostPortPB>)
    */
   public IsAlterXClusterReplicationDoneResponse isAlterXClusterReplicationDone(
-      String replicationGroupId, @Nullable Set<CommonNet.HostPortPB> targetMasterAddresses)
+      String replicationGroupId, Set<CommonNet.HostPortPB> targetMasterAddresses)
       throws Exception {
     Deferred<IsAlterXClusterReplicationDoneResponse> d =
         asyncClient.isAlterXClusterReplicationDone(replicationGroupId, targetMasterAddresses);
