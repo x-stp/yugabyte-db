@@ -382,7 +382,6 @@ public class EditXClusterConfig extends CreateXClusterConfig {
       xClusterConfig.updateStatusForNamespace(dbId, XClusterNamespaceConfig.Status.Updating);
       createXClusterAddNamespaceToOutboundReplicationGroupTask(xClusterConfig, dbId);
       createAddNamespaceToXClusterReplicationTask(xClusterConfig, dbId);
-      xClusterConfig.updateStatusForNamespace(dbId, XClusterNamespaceConfig.Status.Running);
     }
 
     if (xClusterConfig.isUsedForDr()) {

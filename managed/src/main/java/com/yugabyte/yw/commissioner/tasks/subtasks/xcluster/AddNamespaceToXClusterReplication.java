@@ -39,6 +39,9 @@ public class AddNamespaceToXClusterReplication extends XClusterConfigTaskBase {
 
   @Getter
   public static class Params extends XClusterConfigTaskParams {
+    // The target universe UUID must be stored in universeUUID field.
+    // The parent xCluster config must be stored in xClusterConfig field.
+    // The db to be added to the xcluster replication must be stored in the dbToAdd field.
     public String dbToAdd;
   }
 
@@ -92,6 +95,8 @@ public class AddNamespaceToXClusterReplication extends XClusterConfigTaskBase {
           "Alter replication for xClusterConfig {} completed for source db id: {}",
           xClusterConfig.getUuid(),
           taskParams().getDbToAdd());
+
+      xClusterConfig.updateStatusForNamespace(dbId, XClusterNamespaceConfig.Status.Running);
 
     } catch (Exception e) {
       log.error("{} hit error : {}", getName(), e.getMessage());

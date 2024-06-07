@@ -35,6 +35,9 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
 
   @Getter
   public static class Params extends XClusterConfigTaskParams {
+    // The target universe UUID must be stored in universeUUID field.
+    // The parent xCluster config must be stored in xClusterConfig field.
+    // The db to be added to the xcluster replication must be stored in the dbToAdd field.
     public String dbToAdd;
   }
 
