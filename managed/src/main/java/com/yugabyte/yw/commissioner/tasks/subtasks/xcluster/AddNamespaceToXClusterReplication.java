@@ -13,6 +13,7 @@ import com.yugabyte.yw.common.config.UniverseConfKeys;
 import com.yugabyte.yw.forms.XClusterConfigTaskParams;
 import com.yugabyte.yw.models.Universe;
 import com.yugabyte.yw.models.XClusterConfig;
+import com.yugabyte.yw.models.XClusterNamespaceConfig;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
