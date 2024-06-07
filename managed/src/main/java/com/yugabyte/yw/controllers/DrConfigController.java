@@ -1117,25 +1117,24 @@ public class DrConfigController extends AuthenticatedController {
     DrConfig drConfig = DrConfig.getValidConfigOrBadRequest(customer, drConfigUuid);
     disallowActionOnErrorState(drConfig);
     XClusterConfig xClusterConfig = drConfig.getActiveXClusterConfig();
+    Universe sourceUniverse =
+        Universe.getOrBadRequest(xClusterConfig.getSourceUniverseUUID(), customer);
+    Universe targetUniverse =
+        Universe.getOrBadRequest(xClusterConfig.getTargetUniverseUUID(), customer);
+    if (confGetter.getGlobalConf(GlobalConfKeys.xclusterEnableAutoFlagValidation)) {
+      autoFlagUtil.checkSourcePromotedAutoFlagsPromotedOnTarget(sourceUniverse, targetUniverse);
+    }
     DrConfigSetDatabasesForm setDatabasesForm = parseSetDatabasesForm(customerUUID, request);
     Set<String> existingDatabaseIds = xClusterConfig.getDbIds();
     Set<String> newDatabaseIds = setDatabasesForm.databases;
     Set<String> databaseIdsToAdd = new HashSet<>(newDatabaseIds);
     databaseIdsToAdd.removeAll(existingDatabaseIds);
+    if (databaseIdsToAdd.isEmpty()) {
+      throw new IllegalArgumentException("The list of new databases to add is empty.");
+    }
     xClusterConfig.addNamespaces(databaseIdsToAdd);
-    List<XClusterConfig> xClusterConfigs = new ArrayList<>();
-    xClusterConfigs.add(xClusterConfig);
-    drConfig.updateXClusterConfigs(xClusterConfigs);
 
     XClusterConfigController.verifyTaskAllowed(xClusterConfig, TaskType.EditXClusterConfig);
-    Universe sourceUniverse =
-        Universe.getOrBadRequest(xClusterConfig.getSourceUniverseUUID(), customer);
-    Universe targetUniverse =
-        Universe.getOrBadRequest(xClusterConfig.getTargetUniverseUUID(), customer);
-
-    if (confGetter.getGlobalConf(GlobalConfKeys.xclusterEnableAutoFlagValidation)) {
-      autoFlagUtil.checkSourcePromotedAutoFlagsPromotedOnTarget(sourceUniverse, targetUniverse);
-    }
 
     XClusterConfigTaskParams taskParams =
         XClusterConfigController.getSetDatabasesTaskParams(xClusterConfig, databaseIdsToAdd);

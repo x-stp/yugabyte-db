@@ -149,7 +149,7 @@ public class EditXClusterConfig extends CreateXClusterConfig {
                 false /* keepEntry */,
                 databaseNamesToBeDropped);
           }
-        } else if (editFormData.databases != null) { // Used for DB scoped replication only
+        } else if (editFormData.databases != null) { // Used for DB scoped replication only.
           if (!xClusterConfig.getType().equals(ConfigType.Db)) {
             throw new IllegalArgumentException(
                 "The databases must be provided only for DB scoped replication");

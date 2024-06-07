@@ -28,7 +28,6 @@ import com.yugabyte.yw.models.XClusterConfig.ConfigType;
 import com.yugabyte.yw.models.XClusterConfig.XClusterConfigStatusType;
 import com.yugabyte.yw.models.configs.CustomerConfig;
 import com.yugabyte.yw.models.helpers.TaskType;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -150,11 +149,8 @@ public class DrConfigControllerTest extends FakeDBApplication {
     DrConfigSetDatabasesForm setDatabasesData = new DrConfigSetDatabasesForm();
     setDatabasesData.databases = new HashSet<>(Set.of("db1", "db2"));
     XClusterConfig xClusterConfig = drConfig.getActiveXClusterConfig();
-    xClusterConfig.setStatus(XClusterConfigStatusType.Running);
-    List<XClusterConfig> xClusterConfigs = new ArrayList<>();
-    xClusterConfigs.add(xClusterConfig);
-    drConfig.setXClusterConfigs(xClusterConfigs);
-    drConfig.update();
+    xClusterConfig.updateStatus(XClusterConfigStatusType.Running);
+
     taskUUID = buildTaskInfo(null, TaskType.EditDrConfig);
     when(mockCommissioner.submit(any(), any())).thenReturn(taskUUID);
     result =
