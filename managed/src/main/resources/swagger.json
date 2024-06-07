@@ -15375,6 +15375,15 @@
           "description" : "XCluster config name",
           "type" : "string"
         },
+        "namespaceDetails" : {
+          "description" : "Namespaces participating in this xCluster config",
+          "items" : {
+            "$ref" : "#/definitions/XClusterNamespaceConfig"
+          },
+          "readOnly" : true,
+          "type" : "array",
+          "uniqueItems" : true
+        },
         "namespaces" : {
           "items" : {
             "$ref" : "#/definitions/XClusterNamespaceConfig"
@@ -15609,6 +15618,15 @@
           "description" : "XCluster config name",
           "type" : "string"
         },
+        "namespaceDetails" : {
+          "description" : "Namespaces participating in this xCluster config",
+          "items" : {
+            "$ref" : "#/definitions/XClusterNamespaceConfig"
+          },
+          "readOnly" : true,
+          "type" : "array",
+          "uniqueItems" : true
+        },
         "namespaces" : {
           "items" : {
             "$ref" : "#/definitions/XClusterNamespaceConfig"
@@ -15764,6 +15782,11 @@
     "XClusterNamespaceConfig" : {
       "properties" : {
         "sourceNamespaceId" : {
+          "type" : "string"
+        },
+        "status" : {
+          "description" : "Status",
+          "enum" : [ "Validated", "Running", "Updating", "Warning", "Error", "Bootstrapping", "Failed" ],
           "type" : "string"
         }
       },
