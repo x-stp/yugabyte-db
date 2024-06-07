@@ -16,6 +16,7 @@ import com.yugabyte.yw.models.XClusterConfig;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.yb.client.IsXClusterBootstrapRequiredResponse;
@@ -32,9 +33,14 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
     super(baseTaskDependencies, xClusterUniverseService);
   }
 
+  @Getter
+  public static class Params extends XClusterConfigTaskParams {
+    public String dbToAdd;
+  }
+
   @Override
-  protected XClusterConfigTaskParams taskParams() {
-    return (XClusterConfigTaskParams) taskParams;
+  protected Params taskParams() {
+    return (Params) taskParams;
   }
 
   @Override
@@ -72,7 +78,7 @@ public class XClusterAddNamespaceToOutboundReplicationGroup extends XClusterConf
       validateCheckpointingCompleted(client, sourceUniverse, xClusterConfig);
 
       log.debug(
-          "Checkpointing for xClusterConfig {} completed for source db id:",
+          "Checkpointing for xClusterConfig {} completed for source db id: {}",
           xClusterConfig.getUuid(),
           taskParams().getDbToAdd());
     } catch (Exception e) {

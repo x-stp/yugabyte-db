@@ -151,6 +151,12 @@ public class DrConfig extends Model {
     return xClusterConfig;
   }
 
+  public void updateXClusterConfigs(List<XClusterConfig> xClusterConfigs) {
+    this.setXClusterConfigs(xClusterConfigs);
+    this.setModifyTime(new Date());
+    this.update();
+  }
+
   @JsonIgnore
   public XClusterConfig getActiveXClusterConfig() {
     if (xClusterConfigs.isEmpty()) {

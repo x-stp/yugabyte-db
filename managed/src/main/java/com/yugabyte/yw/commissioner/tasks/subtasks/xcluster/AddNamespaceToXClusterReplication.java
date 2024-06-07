@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.yb.CommonNet;
@@ -36,9 +37,14 @@ public class AddNamespaceToXClusterReplication extends XClusterConfigTaskBase {
     super(baseTaskDependencies, xClusterUniverseService);
   }
 
+  @Getter
+  public static class Params extends XClusterConfigTaskParams {
+    public String dbToAdd;
+  }
+
   @Override
-  protected XClusterConfigTaskParams taskParams() {
-    return (XClusterConfigTaskParams) taskParams;
+  protected Params taskParams() {
+    return (Params) taskParams;
   }
 
   @Override
@@ -83,7 +89,7 @@ public class AddNamespaceToXClusterReplication extends XClusterConfigTaskBase {
           client, sourceUniverse, targetMasterAddresses, xClusterConfig);
 
       log.debug(
-          "Alter replication for xClusterConfig {} completed for source db id:",
+          "Alter replication for xClusterConfig {} completed for source db id: {}",
           xClusterConfig.getUuid(),
           taskParams().getDbToAdd());
 

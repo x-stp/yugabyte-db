@@ -49,6 +49,7 @@ import com.yugabyte.yw.models.Universe;
 import com.yugabyte.yw.models.XClusterConfig;
 import com.yugabyte.yw.models.XClusterConfig.ConfigType;
 import com.yugabyte.yw.models.XClusterConfig.XClusterConfigStatusType;
+import com.yugabyte.yw.models.XClusterNamespaceConfig;
 import com.yugabyte.yw.models.XClusterTableConfig;
 import com.yugabyte.yw.models.configs.CustomerConfig;
 import com.yugabyte.yw.models.helpers.TaskType;
@@ -118,6 +119,13 @@ public abstract class XClusterConfigTaskBase extends UniverseDefinitionTaskBase 
           XClusterTableConfig.Status.Validated,
           XClusterTableConfig.Status.Updating,
           XClusterTableConfig.Status.Bootstrapping);
+
+  public static final List<XClusterNamespaceConfig.Status>
+      X_CLUSTER_NAMESPACE_CONFIG_PENDING_STATUS_LIST =
+          ImmutableList.of(
+              XClusterNamespaceConfig.Status.Validated,
+              XClusterNamespaceConfig.Status.Updating,
+              XClusterNamespaceConfig.Status.Bootstrapping);
 
   // XCluster setup is not supported for system and matview tables.
   public static final Set<RelationType> X_CLUSTER_SUPPORTED_TABLE_RELATION_TYPE_SET =
@@ -1898,20 +1906,19 @@ public abstract class XClusterConfigTaskBase extends UniverseDefinitionTaskBase 
    * @param dbIds db ids on the source universe that are being added to checkpoint.
    * @return The created subtask group
    */
-  protected SubTaskGroup createXClusterAddNamespaceToOutboundReplicationGroupTasks(
-      XClusterConfig xClusterConfig, Set<String> dbIds) {
+  protected SubTaskGroup createXClusterAddNamespaceToOutboundReplicationGroupTask(
+      XClusterConfig xClusterConfig, String dbId) {
     SubTaskGroup subTaskGroup =
         createSubTaskGroup("XClusterAddNamespaceToOutboundReplicationGroup");
-    XClusterConfigTaskParams xClusterConfigParams = new XClusterConfigTaskParams();
-    xClusterConfigParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
-    xClusterConfigParams.xClusterConfig = xClusterConfig;
-    for (String dbId : dbIds) {
-      xClusterConfigParams.dbToAdd = dbId;
-      XClusterAddNamespaceToOutboundReplicationGroup task =
-          createTask(XClusterAddNamespaceToOutboundReplicationGroup.class);
-      task.initialize(xClusterConfigParams);
-      subTaskGroup.addSubTask(task);
-    }
+    XClusterAddNamespaceToOutboundReplicationGroup.Params taskParams =
+        new XClusterAddNamespaceToOutboundReplicationGroup.Params();
+    taskParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
+    taskParams.xClusterConfig = xClusterConfig;
+    taskParams.dbToAdd = dbId;
+    XClusterAddNamespaceToOutboundReplicationGroup task =
+        createTask(XClusterAddNamespaceToOutboundReplicationGroup.class);
+    task.initialize(taskParams);
+    subTaskGroup.addSubTask(task);
     getRunnableTask().addSubTaskGroup(subTaskGroup);
     return subTaskGroup;
   }
@@ -1923,18 +1930,18 @@ public abstract class XClusterConfigTaskBase extends UniverseDefinitionTaskBase 
    * @param dbIds db ids on the source universe that are being added to the replication.
    * @return The created subtask group
    */
-  protected SubTaskGroup createAddNamespaceToXClusterReplicationTasks(
-      XClusterConfig xClusterConfig, Set<String> dbIds) {
+  protected SubTaskGroup createAddNamespaceToXClusterReplicationTask(
+      XClusterConfig xClusterConfig, String dbId) {
     SubTaskGroup subTaskGroup = createSubTaskGroup("AddNamespaceToXClusterReplication");
-    XClusterConfigTaskParams xClusterConfigParams = new XClusterConfigTaskParams();
-    xClusterConfigParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
-    xClusterConfigParams.xClusterConfig = xClusterConfig;
-    for (String dbId : dbIds) {
-      xClusterConfigParams.dbToAdd = dbId;
-      AddNamespaceToXClusterReplication task = createTask(AddNamespaceToXClusterReplication.class);
-      task.initialize(xClusterConfigParams);
-      subTaskGroup.addSubTask(task);
-    }
+    AddNamespaceToXClusterReplication.Params taskParams =
+        new AddNamespaceToXClusterReplication.Params();
+    taskParams.setUniverseUUID(xClusterConfig.getSourceUniverseUUID());
+    taskParams.xClusterConfig = xClusterConfig;
+    taskParams.dbToAdd = dbId;
+    AddNamespaceToXClusterReplication task = createTask(AddNamespaceToXClusterReplication.class);
+    task.initialize(taskParams);
+    subTaskGroup.addSubTask(task);
+
     getRunnableTask().addSubTaskGroup(subTaskGroup);
     return subTaskGroup;
   }

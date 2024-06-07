@@ -516,7 +516,7 @@ public class XClusterConfigController extends AuthenticatedController {
   }
 
   static XClusterConfigTaskParams getSetDatabasesTaskParams(
-      YBClientService ybService, XClusterConfig xClusterConfig, Set<String> databaseIds) {
+      XClusterConfig xClusterConfig, Set<String> databaseIds) {
 
     XClusterConfigEditFormData editForm = new XClusterConfigEditFormData();
     editForm.databases = databaseIds;

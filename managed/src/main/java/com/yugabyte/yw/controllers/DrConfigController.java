@@ -1122,6 +1122,10 @@ public class DrConfigController extends AuthenticatedController {
     Set<String> newDatabaseIds = setDatabasesForm.databases;
     Set<String> databaseIdsToAdd = new HashSet<>(newDatabaseIds);
     databaseIdsToAdd.removeAll(existingDatabaseIds);
+    xClusterConfig.addNamespaces(databaseIdsToAdd);
+    List<XClusterConfig> xClusterConfigs = new ArrayList<>();
+    xClusterConfigs.add(xClusterConfig);
+    drConfig.updateXClusterConfigs(xClusterConfigs);
 
     XClusterConfigController.verifyTaskAllowed(xClusterConfig, TaskType.EditXClusterConfig);
     Universe sourceUniverse =
@@ -1134,8 +1138,7 @@ public class DrConfigController extends AuthenticatedController {
     }
 
     XClusterConfigTaskParams taskParams =
-        XClusterConfigController.getSetDatabasesTaskParams(
-            ybService, xClusterConfig, databaseIdsToAdd);
+        XClusterConfigController.getSetDatabasesTaskParams(xClusterConfig, databaseIdsToAdd);
 
     UUID taskUUID = commissioner.submit(TaskType.SetDatabasesDrConfig, taskParams);
     CustomerTask.create(
