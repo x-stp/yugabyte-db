@@ -1130,7 +1130,7 @@ public class DrConfigController extends AuthenticatedController {
     Set<String> databaseIdsToAdd = new HashSet<>(newDatabaseIds);
     databaseIdsToAdd.removeAll(existingDatabaseIds);
     if (databaseIdsToAdd.isEmpty()) {
-      throw new IllegalArgumentException("The list of new databases to add is empty.");
+      throw new PlatformServiceException(BAD_REQUEST, "The list of new databases to add is empty.");
     }
     xClusterConfig.addNamespaces(databaseIdsToAdd);
 

@@ -4,8 +4,11 @@ import static com.yugabyte.yw.common.AssertHelper.assertBadRequest;
 import static com.yugabyte.yw.common.AssertHelper.assertOk;
 import static com.yugabyte.yw.common.AssertHelper.assertPlatformException;
 import static com.yugabyte.yw.common.ModelFactory.createUniverse;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,6 +16,7 @@ import static org.mockito.Mockito.when;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.yugabyte.yw.common.FakeDBApplication;
 import com.yugabyte.yw.common.ModelFactory;
+import com.yugabyte.yw.common.PlatformServiceException;
 import com.yugabyte.yw.common.config.RuntimeConfGetter;
 import com.yugabyte.yw.common.config.impl.SettableRuntimeConfigFactory;
 import com.yugabyte.yw.forms.DrConfigCreateForm;
@@ -174,6 +178,41 @@ public class DrConfigControllerTest extends FakeDBApplication {
     xClusterConfig = drConfig.getActiveXClusterConfig();
     assertEquals(xClusterConfig.getType(), ConfigType.Db);
     assertEquals(2, xClusterConfig.getNamespaces().size());
+
+    DrConfigSetDatabasesForm emptyDatabasesData = new DrConfigSetDatabasesForm();
+    emptyDatabasesData.databases = new HashSet<>();
+    // Trying to add an empty database set.
+    PlatformServiceException exception =
+        assertThrows(
+            PlatformServiceException.class,
+            () ->
+                doRequestWithAuthTokenAndBody(
+                    "PUT",
+                    "/api/customers/"
+                        + defaultCustomer.getUuid()
+                        + "/dr_configs/"
+                        + drConfigId
+                        + "/set_dbs",
+                    authToken,
+                    Json.toJson(emptyDatabasesData)));
+    assertThat(exception.getMessage(), containsString("required"));
+
+    // Trying to add the existing databases.
+    exception =
+        assertThrows(
+            PlatformServiceException.class,
+            () ->
+                doRequestWithAuthTokenAndBody(
+                    "PUT",
+                    "/api/customers/"
+                        + defaultCustomer.getUuid()
+                        + "/dr_configs/"
+                        + drConfigId
+                        + "/set_dbs",
+                    authToken,
+                    Json.toJson(setDatabasesData)));
+    assertThat(
+        exception.getMessage(), containsString("The list of new databases to add is empty."));
   }
 
   @Test
