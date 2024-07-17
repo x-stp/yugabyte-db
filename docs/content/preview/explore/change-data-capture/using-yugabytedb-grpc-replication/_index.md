@@ -42,11 +42,11 @@ To understand how the various features and configuration of the connector, see [
 
 Get started with Yugabyte gRPC replication.
 
-For tutorials on streaming data to Kafka environments, including Amazon MSK, Azure Event Hubs, and Confluent Cloud, see [Kafka environments](/preview/tutorials/cdc-tutorials/).
-
 {{<lead link="./cdc-get-started">}}
 To learn how get started with the connector, see [Get started](./cdc-get-started).
 {{</lead>}}
+
+For tutorials on streaming data to Kafka environments, including Amazon MSK, Azure Event Hubs, and Confluent Cloud, see [Kafka environments](/preview/tutorials/cdc-tutorials/).
 
 ## Monitoring
 
@@ -55,6 +55,7 @@ You can monitor the activities and status of the deployed connectors using the h
 {{<lead link="./cdc-monitor">}}
 To know more about how to monitor your CDC setup, see [Monitor](./cdc-monitor).
 {{</lead>}}
+
 
 ## Learn more
 
